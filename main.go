@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 
 	"github.com/blevesearch/bleve"
 )
@@ -30,19 +30,44 @@ func main() {
 		index.Index(b.Title, b)
 	}
 
-	// Simple text search
+	// Query string
 	query := bleve.NewQueryStringQuery("hello")
+
+	// Simple text search
 	searchRequest := bleve.NewSearchRequest(query)
 	searchRequest.Fields = []string{"*"}
 	searchResult, err := index.Search(searchRequest)
 	if err != nil || searchResult.Total == 0 {
-		log.Println("Not found")
+		fmt.Println("Not found")
 		return
 	}
 
-	for _, hit := range searchResult.Hits {
+	fmt.Println("Simple search result:")
+
+	for i, hit := range searchResult.Hits {
 		jsonstr, _ := json.Marshal(hit.Fields)
-		log.Println(hit.ID, string(jsonstr))
+		fmt.Printf("Hit[%d]: %v %v\n", i, hit.ID, string(jsonstr))
 	}
 
+	// Facets search
+
+	facet := bleve.NewFacetRequest("Author", 10)
+	searchRequest.AddFacet("Author", facet)
+	searchResult, err = index.Search(searchRequest)
+	if err != nil || searchResult.Total == 0 {
+		fmt.Println("Facets Not found")
+		return
+	}
+
+	fmt.Println("Facets search result:")
+
+	for i, hit := range searchResult.Hits {
+		jsonstr, _ := json.Marshal(hit.Fields)
+		fmt.Printf("Hit[%d]: %v %v\n", i, hit.ID, string(jsonstr))
+	}
+
+	for fname, fresult := range searchResult.Facets {
+		jsonstr, _ := json.Marshal(fresult)
+		fmt.Println("Facets:", fname, string(jsonstr))
+	}
 }
