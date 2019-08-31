@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/analysis/analyzer/keyword"
 )
 
 type Blog struct {
@@ -14,7 +15,20 @@ type Blog struct {
 }
 
 func main() {
+	enFieldMapping := bleve.NewTextFieldMapping()
+	enFieldMapping.Analyzer = "en"
+
+	kwFieldMapping := bleve.NewTextFieldMapping()
+	kwFieldMapping.Analyzer = keyword.Name
+
+	blogMapping := bleve.NewDocumentMapping()
+	blogMapping.AddFieldMappingsAt("Title", enFieldMapping)
+	blogMapping.AddFieldMappingsAt("Body", enFieldMapping)
+	blogMapping.AddFieldMappingsAt("Author", kwFieldMapping)
+
 	mapping := bleve.NewIndexMapping()
+	mapping.DefaultMapping = blogMapping
+
 	index, err := bleve.NewMemOnly(mapping)
 	if err != nil {
 		panic(err)
@@ -23,6 +37,7 @@ func main() {
 	blogs := []Blog{
 		{Title: "Hello World", Author: "Sangeet Kumar", Body: "Hello world post"},
 		{Title: "Hello World Again", Author: "Mayan Sangeet", Body: "Hello world post again"},
+		{Title: "Hello World Again 2", Author: "Mayan Sangeet", Body: "Hello world post again one more time"},
 	}
 
 	// Index blogs
