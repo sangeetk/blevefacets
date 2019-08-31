@@ -59,7 +59,7 @@ func main() {
 		return
 	}
 
-	fmt.Println("Facets search result:")
+	fmt.Println("\nFacets search result:")
 
 	for i, hit := range searchResult.Hits {
 		jsonstr, _ := json.Marshal(hit.Fields)
@@ -69,5 +69,9 @@ func main() {
 	for fname, fresult := range searchResult.Facets {
 		jsonstr, _ := json.Marshal(fresult)
 		fmt.Println("Facets:", fname, string(jsonstr))
+		fmt.Println("Authors:")
+		for _, tfacet := range fresult.Terms {
+			fmt.Printf("\t%s (%d)\n", tfacet.Term, tfacet.Count)
+		}
 	}
 }
