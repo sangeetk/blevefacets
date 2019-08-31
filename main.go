@@ -50,7 +50,6 @@ func main() {
 	}
 
 	// Facets search
-
 	facet := bleve.NewFacetRequest("Author", 10)
 	searchRequest.AddFacet("Author", facet)
 	searchResult, err = index.Search(searchRequest)
